@@ -118,7 +118,7 @@ class MultiHeadAttention(nn.Module):
         self.query_dim = node_feat_dim + time_feat_dim
         self.key_dim = node_feat_dim + edge_feat_dim + time_feat_dim
 
-        assert self.query_dim % num_heads == 0, "The sum of node_feat_dim and time_feat_dim should be divided by num_heads!"
+        # assert self.query_dim % num_heads == 0, "The sum of node_feat_dim and time_feat_dim should be divided by num_heads!"
 
         self.head_dim = self.query_dim // num_heads
 

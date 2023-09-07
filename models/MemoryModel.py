@@ -2,6 +2,7 @@ import torch
 import numpy as np
 import torch.nn as nn
 from collections import defaultdict
+import gc
 
 from utils.utils import NeighborSampler
 from models.modules import TimeEncoder, MergeLayer, MultiHeadAttention
@@ -412,7 +413,7 @@ class MemoryBank(nn.Module):
         :param unique_node_ids: ndarray, (num_unique_node_ids, )
         :return:
         """
-        return self.node_last_updated_times[torch.from_numpy(unique_node_ids)]
+        return self.node_last_updated_times[torch.from_numpy(unique_node_ids).long()]
 
     def extra_repr(self):
         """
@@ -477,12 +478,12 @@ class MemoryUpdater(nn.Module):
 
         # Tensor, shape (num_nodes, memory_dim)
         updated_node_memories = self.memory_bank.node_memories.data.clone()
-        updated_node_memories[torch.from_numpy(unique_node_ids)] = self.memory_updater(unique_node_messages,
-                                                                                       updated_node_memories[torch.from_numpy(unique_node_ids)])
+        updated_node_memories[torch.from_numpy(unique_node_ids).long()] = self.memory_updater(unique_node_messages,
+                                                                                       updated_node_memories[torch.from_numpy(unique_node_ids).long()])
 
         # Tensor, shape (num_nodes, )
         updated_node_last_updated_times = self.memory_bank.node_last_updated_times.data.clone()
-        updated_node_last_updated_times[torch.from_numpy(unique_node_ids)] = torch.from_numpy(unique_node_timestamps).float().to(unique_node_messages.device)
+        updated_node_last_updated_times[torch.from_numpy(unique_node_ids).long()] = torch.from_numpy(unique_node_timestamps).float().to(unique_node_messages.device)
 
         return updated_node_memories, updated_node_last_updated_times
 
@@ -649,6 +650,10 @@ class GraphAttentionEmbedding(nn.Module):
             # get edge features, shape (batch_size, num_neighbors, edge_feat_dim)
             neighbor_edge_features = self.edge_raw_features[torch.from_numpy(neighbor_edge_ids)]
             # temporal graph convolution
+            # free up memory torch device
+            del neighbor_edge_ids, neighbor_times, neighbor_delta_times
+            gc.collect()
+            torch.cuda.empty_cache()
             # Tensor, output shape (batch_size, node_feat_dim + time_feat_dim)
             output, _ = self.temporal_conv_layers[current_layer_num - 1](node_features=node_conv_features,
                                                                          node_time_features=node_time_features,

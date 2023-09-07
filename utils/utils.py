@@ -3,7 +3,11 @@ import torch
 import torch.nn as nn
 import numpy as np
 import pandas as pd
+import os
 
+# Set PYTORCH_CUDA_ALLOC_CONF environment variable
+# os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "caching_allocator"
+# os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:512"
 
 def set_random_seed(seed: int = 0):
     """
@@ -11,10 +15,15 @@ def set_random_seed(seed: int = 0):
     :param seed: int, random seed
     :return:
     """
+    #free memory
+    torch.cuda.empty_cache()
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
     if torch.cuda.is_available():
+        print('Using CUDA!')
+        # how many gpu devices are available
+        print(f'Available GPU devices: {torch.cuda.device_count()}')
         torch.cuda.manual_seed_all(seed)
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
@@ -157,10 +166,10 @@ class NeighborSampler:
         # All interactions described in the following three matrices are sorted in each row by time
         # each entry in position (i,j) represents the id of the j-th dst node of src node node_ids[i] with an interaction before node_interact_times[i]
         # ndarray, shape (batch_size, num_neighbors)
-        nodes_neighbor_ids = np.zeros((len(node_ids), num_neighbors)).astype(np.long)
+        nodes_neighbor_ids = np.zeros((len(node_ids), num_neighbors)).astype(np.longlong)
         # each entry in position (i,j) represents the id of the edge with src node node_ids[i] and dst node nodes_neighbor_ids[i][j] with an interaction before node_interact_times[i]
         # ndarray, shape (batch_size, num_neighbors)
-        nodes_edge_ids = np.zeros((len(node_ids), num_neighbors)).astype(np.long)
+        nodes_edge_ids = np.zeros((len(node_ids), num_neighbors)).astype(np.longlong)
         # each entry in position (i,j) represents the interaction time between src node node_ids[i] and dst node nodes_neighbor_ids[i][j], before node_interact_times[i]
         # ndarray, shape (batch_size, num_neighbors)
         nodes_neighbor_times = np.zeros((len(node_ids), num_neighbors)).astype(np.float32)
@@ -444,7 +453,7 @@ class NegativeEdgeSampler(object):
 
         # Note that if one of the input of np.concatenate is empty, the output will be composed of floats.
         # Hence, convert the type to long to guarantee valid index
-        return negative_src_node_ids.astype(np.long), negative_dst_node_ids.astype(np.long)
+        return negative_src_node_ids.astype(np.longlong), negative_dst_node_ids.astype(np.longlong)
 
     def inductive_sample(self, size: int, batch_src_node_ids: np.ndarray, batch_dst_node_ids: np.ndarray,
                          current_batch_start_time: float, current_batch_end_time: float):
@@ -484,7 +493,7 @@ class NegativeEdgeSampler(object):
 
         # Note that if one of the input of np.concatenate is empty, the output will be composed of floats.
         # Hence, convert the type to long to guarantee valid index
-        return negative_src_node_ids.astype(np.long), negative_dst_node_ids.astype(np.long)
+        return negative_src_node_ids.astype(np.longlong), negative_dst_node_ids.astype(np.longlong)
 
     def reset_random_state(self):
         """

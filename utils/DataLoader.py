@@ -75,29 +75,40 @@ def get_link_prediction_data(dataset_name: str, val_ratio: float, test_ratio: fl
     """
     # Load data and train val test split
     graph_df = pd.read_csv('./processed_data/{}/ml_{}.csv'.format(dataset_name, dataset_name))
-    edge_raw_features = np.load('./processed_data/{}/ml_{}.npy'.format(dataset_name, dataset_name))
-    node_raw_features = np.load('./processed_data/{}/ml_{}_node.npy'.format(dataset_name, dataset_name))
+    edge_raw_features = np.load('./processed_data/{}/ml_{}.npy'.format(dataset_name, dataset_name), allow_pickle=True)
+    node_raw_features = np.load('./processed_data/{}/ml_{}_node.npy'.format(dataset_name, dataset_name), allow_pickle=True)
 
-    NODE_FEAT_DIM = EDGE_FEAT_DIM = 172
+    NODE_FEAT_DIM = EDGE_FEAT_DIM = 219
     assert NODE_FEAT_DIM >= node_raw_features.shape[1], f'Node feature dimension in dataset {dataset_name} is bigger than {NODE_FEAT_DIM}!'
     assert EDGE_FEAT_DIM >= edge_raw_features.shape[1], f'Edge feature dimension in dataset {dataset_name} is bigger than {EDGE_FEAT_DIM}!'
-    # padding the features of edges and nodes to the same dimension (172 for all the datasets)
+    # padding the features of edges and nodes to the same dimension (219 for all the datasets)
     if node_raw_features.shape[1] < NODE_FEAT_DIM:
-        node_zero_padding = np.zeros((node_raw_features.shape[0], 172 - node_raw_features.shape[1]))
+        node_zero_padding = np.zeros((node_raw_features.shape[0], 219 - node_raw_features.shape[1]))
         node_raw_features = np.concatenate([node_raw_features, node_zero_padding], axis=1)
     if edge_raw_features.shape[1] < EDGE_FEAT_DIM:
-        edge_zero_padding = np.zeros((edge_raw_features.shape[0], 172 - edge_raw_features.shape[1]))
+        edge_zero_padding = np.zeros((edge_raw_features.shape[0], 219 - edge_raw_features.shape[1]))
         edge_raw_features = np.concatenate([edge_raw_features, edge_zero_padding], axis=1)
 
     assert NODE_FEAT_DIM == node_raw_features.shape[1] and EDGE_FEAT_DIM == edge_raw_features.shape[1], "Unaligned feature dimensions after feature padding!"
 
     # get the timestamp of validate and test set
-    val_time, test_time = list(np.quantile(graph_df.ts, [(1 - val_ratio - test_ratio), (1 - test_ratio)]))
-
-    src_node_ids = graph_df.u.values.astype(np.long)
-    dst_node_ids = graph_df.i.values.astype(np.long)
+    ### To remove later: Test
+    from collections import Counter
+    import math
+    timestamps = list(Counter(graph_df.ts).keys())
+    ###
+    # val_time_approx, test_time_approx = list(np.quantile(graph_df.ts, [(1 - val_ratio - test_ratio), (1 - test_ratio)]))
+    val_time_approx, test_time_approx = list(np.quantile(timestamps, [(1 - val_ratio - test_ratio), (1 - test_ratio)]))
+    val_time = math.floor(val_time_approx)
+    test_time = math.floor(test_time_approx)
+    
+    print("val_time: ", val_time)
+    print("test_time: ", test_time)
+    print('graph_df.ts: ', Counter(graph_df.ts),'len graph_df.ts: ', len(graph_df.ts.values))
+    src_node_ids = graph_df.u.values.astype(np.longlong)
+    dst_node_ids = graph_df.i.values.astype(np.longlong)
     node_interact_times = graph_df.ts.values.astype(np.float64)
-    edge_ids = graph_df.idx.values.astype(np.long)
+    edge_ids = graph_df.idx.values.astype(np.longlong)
     labels = graph_df.label.values
 
     full_data = Data(src_node_ids=src_node_ids, dst_node_ids=dst_node_ids, node_interact_times=node_interact_times, edge_ids=edge_ids, labels=labels)
@@ -112,7 +123,7 @@ def get_link_prediction_data(dataset_name: str, val_ratio: float, test_ratio: fl
     # compute nodes which appear at test time
     test_node_set = set(src_node_ids[node_interact_times > val_time]).union(set(dst_node_ids[node_interact_times > val_time]))
     # sample nodes which we keep as new nodes (to test inductiveness), so then we have to remove all their edges from training
-    new_test_node_set = set(random.sample(test_node_set, int(0.1 * num_total_unique_node_ids)))
+    new_test_node_set = set(random.choices(list(test_node_set), k=int(0.1 * num_total_unique_node_ids)))
 
     # mask for each source and destination to denote whether they are new test nodes
     new_test_source_mask = graph_df.u.map(lambda x: x in new_test_node_set).values
@@ -188,15 +199,15 @@ def get_node_classification_data(dataset_name: str, val_ratio: float, test_ratio
     edge_raw_features = np.load('./processed_data/{}/ml_{}.npy'.format(dataset_name, dataset_name))
     node_raw_features = np.load('./processed_data/{}/ml_{}_node.npy'.format(dataset_name, dataset_name))
 
-    NODE_FEAT_DIM = EDGE_FEAT_DIM = 172
+    NODE_FEAT_DIM = EDGE_FEAT_DIM = 219
     assert NODE_FEAT_DIM >= node_raw_features.shape[1], f'Node feature dimension in dataset {dataset_name} is bigger than {NODE_FEAT_DIM}!'
     assert EDGE_FEAT_DIM >= edge_raw_features.shape[1], f'Edge feature dimension in dataset {dataset_name} is bigger than {EDGE_FEAT_DIM}!'
-    # padding the features of edges and nodes to the same dimension (172 for all the datasets)
+    # padding the features of edges and nodes to the same dimension (219 for all the datasets)
     if node_raw_features.shape[1] < NODE_FEAT_DIM:
-        node_zero_padding = np.zeros((node_raw_features.shape[0], 172 - node_raw_features.shape[1]))
+        node_zero_padding = np.zeros((node_raw_features.shape[0], 219 - node_raw_features.shape[1]))
         node_raw_features = np.concatenate([node_raw_features, node_zero_padding], axis=1)
     if edge_raw_features.shape[1] < EDGE_FEAT_DIM:
-        edge_zero_padding = np.zeros((edge_raw_features.shape[0], 172 - edge_raw_features.shape[1]))
+        edge_zero_padding = np.zeros((edge_raw_features.shape[0], 219 - edge_raw_features.shape[1]))
         edge_raw_features = np.concatenate([edge_raw_features, edge_zero_padding], axis=1)
 
     assert NODE_FEAT_DIM == node_raw_features.shape[1] and EDGE_FEAT_DIM == edge_raw_features.shape[1], "Unaligned feature dimensions after feature padding!"
@@ -204,10 +215,10 @@ def get_node_classification_data(dataset_name: str, val_ratio: float, test_ratio
     # get the timestamp of validate and test set
     val_time, test_time = list(np.quantile(graph_df.ts, [(1 - val_ratio - test_ratio), (1 - test_ratio)]))
 
-    src_node_ids = graph_df.u.values.astype(np.long)
-    dst_node_ids = graph_df.i.values.astype(np.long)
+    src_node_ids = graph_df.u.values.astype(np.longlong)
+    dst_node_ids = graph_df.i.values.astype(np.longlong)
     node_interact_times = graph_df.ts.values.astype(np.float64)
-    edge_ids = graph_df.idx.values.astype(np.long)
+    edge_ids = graph_df.idx.values.astype(np.longlong)
     labels = graph_df.label.values
 
     # The setting of seed follows previous works

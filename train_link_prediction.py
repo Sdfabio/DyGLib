@@ -67,6 +67,8 @@ if __name__ == "__main__":
         set_random_seed(seed=run)
 
         args.seed = run
+        # how many gpu do I have
+        print('Number of GPU devices',torch._C._cuda_getDeviceCount())
         args.save_model_name = f'{args.model_name}_seed{args.seed}'
 
         # set up logger
@@ -301,6 +303,8 @@ if __name__ == "__main__":
             for metric_name in train_metrics[0].keys():
                 logger.info(f'train {metric_name}, {np.mean([train_metric[metric_name] for train_metric in train_metrics]):.4f}')
             logger.info(f'validate loss: {np.mean(val_losses):.4f}')
+            print(val_metrics)
+            logger.info(val_metrics)
             for metric_name in val_metrics[0].keys():
                 logger.info(f'validate {metric_name}, {np.mean([val_metric[metric_name] for val_metric in val_metrics]):.4f}')
             logger.info(f'new node validate loss: {np.mean(new_node_val_losses):.4f}')

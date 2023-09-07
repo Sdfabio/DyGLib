@@ -28,7 +28,8 @@ class DyGFormer(nn.Module):
         :param device: str, device
         """
         super(DyGFormer, self).__init__()
-
+        print('Initializing DyGFormer model...')
+        print('Device: {}'.format(device))
         self.node_raw_features = torch.from_numpy(node_raw_features.astype(np.float32)).to(device)
         self.edge_raw_features = torch.from_numpy(edge_raw_features.astype(np.float32)).to(device)
 
@@ -227,8 +228,8 @@ class DyGFormer(nn.Module):
 
         # pad the sequences
         # three ndarrays with shape (batch_size, max_seq_length)
-        padded_nodes_neighbor_ids = np.zeros((len(node_ids), max_seq_length)).astype(np.long)
-        padded_nodes_edge_ids = np.zeros((len(node_ids), max_seq_length)).astype(np.long)
+        padded_nodes_neighbor_ids = np.zeros((len(node_ids), max_seq_length)).astype(np.longlong)
+        padded_nodes_edge_ids = np.zeros((len(node_ids), max_seq_length)).astype(np.longlong)
         padded_nodes_neighbor_times = np.zeros((len(node_ids), max_seq_length)).astype(np.float32)
 
         for idx in range(len(node_ids)):
