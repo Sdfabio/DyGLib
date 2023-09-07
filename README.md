@@ -4,22 +4,31 @@
 ## Overview
 Dynamic Graph Library (DyGLib) is an open-source toolkit with standard training pipelines, extensible coding interfaces, and comprehensive evaluating strategies, 
 which aims to promote standard, scalable, and reproducible dynamic graph learning research. Diverse benchmark datasets and thorough baselines are involved in DyGLib.
-![](figures/CTDyGLib_procedure.jpg)
+![](figures/DyGLib_procedure.jpg)
 
 
 ## Benchmark Datasets and Preprocessing
-Thirteen datasets are used in DyGLib, including Wikipedia, Reddit, MOOC, LastFM, Enron, Social Evo., UCI, Flights, Can. Parl., 
-US Legis., UN Trade, UN Vote, and Contact. The first four datasets are bipartite, and the others only contain nodes with a single type.
-All the used original dynamic graph datasets come from [Towards Better Evaluation for Dynamic Link Prediction](https://openreview.net/forum?id=1GVpwr2Tfdg), 
+Fourteen datasets are used in DyGLib, including Wikipedia, Reddit, MOOC, LastFM, Myket, Enron, Social Evo., UCI, Flights, Can. Parl., 
+US Legis., UN Trade, UN Vote, and Contact. The first five datasets are bipartite, and the others only contain nodes with a single type.
+
+Most of the used original dynamic graph datasets come from [Towards Better Evaluation for Dynamic Link Prediction](https://openreview.net/forum?id=1GVpwr2Tfdg), 
 which can be downloaded [here](https://zenodo.org/record/7213796#.Y1cO6y8r30o). 
-Please first download them and put them in ```DG_data``` folder. 
-Then, please run ```preprocess_data/preprocess_data.py``` for pre-processing the datasets.
+Please download them and put them in ```DG_data``` folder. 
+The Myket dataset comes from [Effect of Choosing Loss Function when Using T-batching for Representation Learning on Dynamic Networks](https://arxiv.org/abs/2308.06862) and 
+can be accessed from [here](https://github.com/erfanloghmani/myket-android-application-market-dataset). 
+The original and preprocessed files for Myket dataset are included in this repository.
+
+We can run ```preprocess_data/preprocess_data.py``` for pre-processing the datasets.
 For example, to preprocess the *Wikipedia* dataset, we can run the following commands:
 ```{bash}
 cd preprocess_data/
 python preprocess_data.py  --dataset_name wikipedia
 ```
-
+We can also run the following commands to preprocess all the original datasets at once:
+```{bash}
+cd preprocess_data/
+python preprocess_all_data.py
+```
 
 ## Dynamic Graph Learning Models
 Eight popular continuous-time dynamic graph learning methods are included in DyGLib, including 
@@ -31,7 +40,7 @@ Eight popular continuous-time dynamic graph learning methods are included in DyG
 [EdgeBank](https://openreview.net/forum?id=1GVpwr2Tfdg), 
 [TCL](https://arxiv.org/abs/2105.07944), and 
 [GraphMixer](https://openreview.net/forum?id=ayPPc0SyLv1).
-Our recent work [DyGFormer](http://arxiv.org/abs/2303.13047) is also integrated into DyGLib, which can explore the correlations of the source node and destination node by a neighbor co-occurrence encoding scheme, and
+Our recent work [DyGFormer](https://arxiv.org/abs/2303.13047) is also integrated into DyGLib, which can explore the correlations of the source node and destination node by a neighbor co-occurrence encoding scheme, and
 effectively and efficiently benefit from longer histories via a patching technique.
 ![](figures/DyGFormer_framework.jpg)
 
@@ -52,8 +61,9 @@ New datasets and new models are welcomed to be incorporated into DyGLib by pull 
 ## Environments
 [PyTorch 1.8.1](https://pytorch.org/), 
 [numpy](https://github.com/numpy/numpy),
-[pandas](https://github.com/pandas-dev/pandas), and
-[tqdm](https://github.com/tqdm/tqdm)
+[pandas](https://github.com/pandas-dev/pandas),
+[tqdm](https://github.com/tqdm/tqdm), and 
+[tabulate](https://github.com/astanin/python-tabulate)
 
 
 ## Executing Scripts
