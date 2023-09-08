@@ -288,7 +288,7 @@ class NeighborSampler:
         self.random_state = np.random.RandomState(self.seed)
 
 
-def get_neighbor_sampler(data: Data, sample_neighbor_strategy: str = 'uniform', time_scaling_factor: float = 0.0, seed: int = None):
+def get_neighbor_sampler(data: pd.DataFrame, sample_neighbor_strategy: str = 'uniform', time_scaling_factor: float = 0.0, seed: int = None):
     """
     get neighbor sampler
     :param data: Data
