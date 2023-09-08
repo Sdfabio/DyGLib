@@ -15,7 +15,6 @@ def preprocess(dataset_name: str):
     u_list, i_list, ts_list, label_list = [], [], [], []
     feat_l = []
     idx_list = []
-    dataset_name = r'C:\Users\fabri\OneDrive\Documents\Demo\Allocation_model_GNN\DyGLib\DG_data\custom_dataset\custom_dataset.csv'
     data = pd.read_csv(dataset_name)
     with open(dataset_name) as f:
         # skip the first line
@@ -93,9 +92,8 @@ def preprocess_data(dataset_name: str, bipartite: bool = True, node_feat_dim: in
     :param node_feat_dim: int, dimension of node features
     :return:
     """
-    Path("./processed_data/{}/".format(dataset_name)).mkdir(parents=True, exist_ok=True)
+    Path("../processed_data/{}/".format(dataset_name)).mkdir(parents=True, exist_ok=True)
     PATH = '../DG_data/{}/{}.csv'.format(dataset_name, dataset_name)
-    # PATH = r'C:\Users\fabri\OneDrive\Documents\Demo\Allocation_model_GNN\DyGLib\DG_data\wikipedia\wikipedia.csv'
     OUT_DF = '../processed_data/{}/ml_{}.csv'.format(dataset_name, dataset_name)
     OUT_FEAT = '../processed_data/{}/ml_{}.npy'.format(dataset_name, dataset_name)
     OUT_NODE_FEAT = '../processed_data/{}/ml_{}_node.npy'.format(dataset_name, dataset_name)
@@ -170,13 +168,14 @@ if args.dataset_name in ['enron', 'SocialEvo', 'uci']:
     print(f'the original dataset of {args.dataset_name} is unavailable, directly use the processed dataset by previous works.')
 else:
     # bipartite dataset
-    if args.dataset_name in ['wikipedia', 'reddit', 'mooc', 'lastfm']:
+    if args.dataset_name in ['wikipedia', 'reddit', 'mooc', 'lastfm', 'myket']:
         preprocess_data(dataset_name=args.dataset_name, bipartite=True, node_feat_dim=args.node_feat_dim)
     else:
         preprocess_data(dataset_name=args.dataset_name, bipartite=False, node_feat_dim=args.node_feat_dim)
     print(f'{args.dataset_name} is processed successfully.')
 
-    check_data(args.dataset_name)
+    if args.dataset_name not in ['myket']:
+        check_data(args.dataset_name)
     print(f'{args.dataset_name} passes the checks successfully.')
 
 
