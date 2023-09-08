@@ -90,10 +90,14 @@ def get_link_prediction_data(dataset_name: str, val_ratio: float, test_ratio: fl
         edge_raw_features = np.concatenate([edge_raw_features, edge_zero_padding], axis=1)
 
     assert NODE_FEAT_DIM == node_raw_features.shape[1] and EDGE_FEAT_DIM == edge_raw_features.shape[1], 'Unaligned feature dimensions after feature padding!'
-
+    from collections import Counter
+    import math
+    dic= Counter(graph_df.ts)
+    times = list(dic.keys())
     # get the timestamp of validate and test set
-    val_time, test_time = list(np.quantile(graph_df.ts, [(1 - val_ratio - test_ratio), (1 - test_ratio)]))
-
+    val_time, test_time = list(np.quantile(times, [(1 - val_ratio - test_ratio), (1 - test_ratio)]))
+    val_time = math.floor(val_time)
+    test_time = math.floor(test_time) 
     src_node_ids = graph_df.u.values.astype(np.longlong)
     dst_node_ids = graph_df.i.values.astype(np.longlong)
     node_interact_times = graph_df.ts.values.astype(np.float64)
